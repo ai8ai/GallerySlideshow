@@ -3,6 +3,7 @@ import { View, StyleSheet, FlatList, Image, Text, TouchableOpacity, Alert } from
 import * as MediaLibrary from 'expo-media-library';
 import AlbumSlideshow from '@/components/AlbumSlideshow';
 
+
 // Define the extended Album type
 interface AlbumWithCover extends MediaLibrary.Album {
     cover: string | null;
@@ -12,6 +13,7 @@ export default function GalleryAlbums() {
     const [albums, setAlbums] = useState<AlbumWithCover[]>([]); // Explicitly use AlbumWithCover[]
     const [permissionGranted, setPermissionGranted] = useState(false);
     const [selectedAlbum, setSelectedAlbum] = useState<AlbumWithCover | null>(null);
+    const [isSlideshowVisible, setSlideshowVisible] = useState(false);
 
     useEffect(() => {
         const getPermissions = async () => {
@@ -47,6 +49,7 @@ export default function GalleryAlbums() {
 
     const handleAlbumPress = (album: AlbumWithCover) => {
         setSelectedAlbum(album);
+        setSlideshowVisible(true);
     };
 
     const renderAlbum = ({ item }: { item: AlbumWithCover }) => (

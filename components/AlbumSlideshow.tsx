@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 
+
 interface AlbumSlideshowProps {
     album: MediaLibrary.Album;
 }
