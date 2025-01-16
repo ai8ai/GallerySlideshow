@@ -28,8 +28,9 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         fetchImages();
 
         const interval = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-        }, 3000); // Change image every 3 seconds
+            // setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+            setCurrentIndex(() => Math.floor(Math.random() * images.length));
+        }, 2000); // Change image every 3 seconds
 
         return () => clearInterval(interval);
     }, [album, images.length]);
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: '100%',
-        resizeMode: 'contain',
+        resizeMode: 'cover', //contain
     },
     loading: {
         flex: 1,

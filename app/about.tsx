@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigation, useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import AlbumSlideshow from '@/components/AlbumSlideshow';
 
 
