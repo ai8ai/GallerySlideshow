@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Image, Text, TouchableOpacity, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import AlbumSlideshow from '@/components/AlbumSlideshow';
-
+import { router } from 'expo-router';
 
 // Define the extended Album type
 interface AlbumWithCover extends MediaLibrary.Album {
@@ -12,8 +12,7 @@ interface AlbumWithCover extends MediaLibrary.Album {
 export default function GalleryAlbums() {
     const [albums, setAlbums] = useState<AlbumWithCover[]>([]); // Explicitly use AlbumWithCover[]
     const [permissionGranted, setPermissionGranted] = useState(false);
-    const [selectedAlbum, setSelectedAlbum] = useState<AlbumWithCover | null>(null);
-    const [isSlideshowVisible, setSlideshowVisible] = useState(false);
+    // const [selectedAlbum, setSelectedAlbum] = useState<AlbumWithCover | null>(null);
 
     useEffect(() => {
         const getPermissions = async () => {
@@ -47,9 +46,17 @@ export default function GalleryAlbums() {
         getPermissions();
     }, []);
 
+    // const handleAlbumPress = (album: AlbumWithCover) => {
+    //     setSelectedAlbum(album);
+    //     setSlideshowVisible(true);
+    // };
+
     const handleAlbumPress = (album: AlbumWithCover) => {
-        setSelectedAlbum(album);
-        setSlideshowVisible(true);
+        // const router = useRouter();
+        router.push({
+            pathname: '/about',
+            params: { selectedAlbum: JSON.stringify(album) },
+        });
     };
 
     const renderAlbum = ({ item }: { item: AlbumWithCover }) => (
@@ -64,9 +71,9 @@ export default function GalleryAlbums() {
         </TouchableOpacity>
     );
 
-    if (selectedAlbum) {
-        return <AlbumSlideshow album={selectedAlbum} />;
-    }
+    // if (selectedAlbum) {
+    //     return <AlbumSlideshow album={selectedAlbum} />;
+    // }
 
     return (
         <View style={styles.container}>

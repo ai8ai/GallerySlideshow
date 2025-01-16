@@ -42,13 +42,14 @@ export default function RootLayout() {
     return (
         <>
             <Stack>
-                <Stack.Screen
-                    name="index"
-                    options={{
-                        title: 'Home',
-                        headerRight: renderMenu,
-                    }}
-                />
+                <Stack.Screen name="index" options={{
+                    title: 'Home',
+                    headerRight: renderMenu,
+                }} />
+                <Stack.Screen name="about" options={{
+                    title: 'SS',
+                    headerRight: renderMenu,
+                }} />
             </Stack>
             <StatusBar style="light" />
         </>
