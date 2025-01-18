@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+
 import { TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -75,5 +77,112 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
     menuButton: {
         marginRight: 10,
+    },
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState } from 'react';
+
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+
+import { TouchableOpacity, Alert, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Menu, Provider } from 'react-native-paper';
+
+type MenuAction = 'home' | 'delete' | 'quit';
+
+export default function RootLayout() {
+    const [menuVisible, setMenuVisible] = useState(false);
+
+    const handleMenuAction = (action: MenuAction) => {
+        switch (action) {
+            case 'home':
+                Alert.alert('Navigation', 'Back to Home');
+                break;
+            case 'delete':
+                Alert.alert('Action', 'Delete clicked');
+                break;
+            case 'quit':
+                Alert.alert('Action', 'Quit clicked');
+                break;
+            default:
+                break;
+        }
+    };
+
+
+    const renderHomeMenu = () => (
+        <Menu
+            visible={menuVisible}
+            onDismiss={() => setMenuVisible(false)}
+            anchor={
+                <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
+                    style={styles.menuButton}
+                >
+                    <Ionicons name="ellipsis-vertical" size={24} color="black" />
+                </TouchableOpacity>
+            }
+        >
+            <Menu.Item
+                onPress={() => handleMenuAction('home')}
+                title="Back to Home"
+            />
+            <Menu.Item
+                onPress={() => handleMenuAction('delete')}
+                title="Delete"
+            />
+            <Menu.Item
+                onPress={() => handleMenuAction('quit')}
+                title="Quit"
+            />
+        </Menu>
+    );
+    
+   
+
+    return (
+        <Provider>
+            <Stack>
+                <Stack.Screen name="index" options={{
+                    title: 'click to start',
+                    headerRight: renderHomeMenu,
+                }} />
+                <Stack.Screen
+                    name="about"
+                    options={{ headerShown: false }} // Hide the header for the "About" screen
+                />
+            </Stack>
+            <StatusBar style="light" translucent />
+        </Provider>
+    );
+}
+
+const styles = StyleSheet.create({
+    menuButton: {
+        marginRight: 10,
+    },
+    menuWrapper: {
+        position: 'absolute',
+        top: 0,
+        right: 10,
     },
 });

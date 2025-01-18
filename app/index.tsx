@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Image, Text, TouchableOpacity, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-import AlbumSlideshow from '@/components/AlbumSlideshow';
 import { router } from 'expo-router';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
 // Define the extended Album type
 interface AlbumWithCover extends MediaLibrary.Album {
     cover: string | null;
 }
 
-export default function GalleryAlbums() {
+const Drawer = createDrawerNavigator();
+
+function MainGallery() {
     const [albums, setAlbums] = useState<AlbumWithCover[]>([]); // Explicitly use AlbumWithCover[]
     const [permissionGranted, setPermissionGranted] = useState(false);
-    // const [selectedAlbum, setSelectedAlbum] = useState<AlbumWithCover | null>(null);
 
     useEffect(() => {
         const getPermissions = async () => {
@@ -46,13 +47,7 @@ export default function GalleryAlbums() {
         getPermissions();
     }, []);
 
-    // const handleAlbumPress = (album: AlbumWithCover) => {
-    //     setSelectedAlbum(album);
-    //     setSlideshowVisible(true);
-    // };
-
     const handleAlbumPress = (album: AlbumWithCover) => {
-        // const router = useRouter();
         router.push({
             pathname: '/about',
             params: { selectedAlbum: JSON.stringify(album) },
@@ -71,10 +66,6 @@ export default function GalleryAlbums() {
         </TouchableOpacity>
     );
 
-    // if (selectedAlbum) {
-    //     return <AlbumSlideshow album={selectedAlbum} />;
-    // }
-
     return (
         <View style={styles.container}>
             {permissionGranted ? (
@@ -89,6 +80,30 @@ export default function GalleryAlbums() {
                 <Text style={styles.permissionText}>Permission required to access media library.</Text>
             )}
         </View>
+    );
+}
+
+function DrawerOptionScreen() {
+    return (
+        <View style={styles.container}>
+            <Text style={styles.permissionText}>This is a drawer option!</Text>
+        </View>
+    );
+}
+
+export default function GalleryAlbums() {
+    return (
+        <Drawer.Navigator
+            screenOptions={{
+                drawerStyle: {
+                    width: 250,
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                },
+            }}
+        >
+            <Drawer.Screen name="Gallery" component={MainGallery} options={{ title: 'My Gallery' }} />
+            <Drawer.Screen name="Option" component={DrawerOptionScreen} options={{ title: 'Drawer Option' }} />
+        </Drawer.Navigator>
     );
 }
 

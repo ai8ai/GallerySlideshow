@@ -1,7 +1,6 @@
 import React from 'react';
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from 'expo-router';
 import AlbumSlideshow from '@/components/AlbumSlideshow';
-
 
 const AboutScreen = () => {
     const params = useLocalSearchParams();
