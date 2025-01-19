@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Animated, Pressable } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import useScaleAnimation from '@/hooks/useAnimations';
 
@@ -146,16 +146,20 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     }
 
     return (
-        <View style={styles.container}>
-            {images.length > 0 && (
-                <Animated.Image
-                    source={{ uri: images[currentIndex] }}
-                    style={[
-                        styles.image,
-                        getAnimationStyle(animationType, scaleAnim),
-                    ]}
-                />
-            )}
+        <View style={styles.imageContainer}>
+            <Animated.View
+                style={[
+                    styles.image,
+                    getAnimationStyle(animationType, scaleAnim),
+                ]}
+            >
+                <Pressable onPress={() => alert('Hi')} style={StyleSheet.absoluteFillObject}>
+                    <Animated.Image
+                        source={{ uri: images[currentIndex] }}
+                        style={styles.image}
+                    />
+                </Pressable>
+            </Animated.View>
         </View>
     );
 };
@@ -163,6 +167,11 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
 
 
 const styles = StyleSheet.create({
+    imageContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     container: {
         flex: 1,
         position: 'absolute',
