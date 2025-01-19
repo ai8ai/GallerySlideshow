@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Modal,
-    Text,
-    StyleSheet,
-    ActivityIndicator,
-    Animated,
-    Pressable,
-} from 'react-native';
+import {View,Modal,Text,TextInput,    StyleSheet,ActivityIndicator,    Animated,    Pressable,} from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
+import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; // Import the animation module
 import useScaleAnimation from '@/hooks/useAnimations';
 import CustomModal from '@/components/CustomModal';
-import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; // Import the animation module
+
 
 interface AlbumSlideshowProps {
     album: MediaLibrary.Album;
@@ -25,7 +18,9 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const { scaleAnim, animateImageChange } = useScaleAnimation();
     const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
     const [modalVisible, setModalVisible] = useState(false);
+    const [isIntervalInputVisible, setIsIntervalInputVisible] = useState(false);
 
+    
     const handleDeleteImage = () => {
         const updatedImages = [...images];
         updatedImages.splice(currentIndex, 1);
@@ -34,8 +29,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     };
 
     const handleChangeInterval = () => {
-        console.log('Change Interval');
-        setModalVisible(false);
+        setIsIntervalInputVisible(true); // Show the text input
     };
 
     const handleHelp = () => {
@@ -106,9 +100,20 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
             </Animated.View>
             <CustomModal
                 visible={modalVisible}
-                onClose={() => setModalVisible(false)}
-                options={modalOptions}
-            />
+                onClose={() => {
+                    setModalVisible(false);
+                    setIsIntervalInputVisible(false); // Reset input visibility when closing
+                }}
+                options={!isIntervalInputVisible ? modalOptions : []} // Hide default options when input is active
+            >
+                {isIntervalInputVisible && (
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Enter Interval (ms)"
+                        keyboardType="numeric"
+                    />
+                )}
+            </CustomModal>
         </View>
     );
 };
@@ -127,6 +132,13 @@ const styles = StyleSheet.create({
     loading: {
         flex: 1,
         justifyContent: 'center',
+    },
+    textInput: {
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        marginBottom: 20,
     },
 });
 

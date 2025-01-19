@@ -1,6 +1,12 @@
 import React from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 
+// interface CustomModalProps {
+//     visible: boolean; // Determines whether the modal is visible
+//     onClose: () => void; // Callback for closing the modal
+//     message: string; // Message to display in the modal
+// }
+
 interface CustomModalProps {
     visible: boolean;
     onClose: () => void;
@@ -8,30 +14,33 @@ interface CustomModalProps {
     children?: React.ReactNode;
 }
 
-const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options, children }) => {
+const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options  }) => {
     return (
-        <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
+        >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    {children ? (
-                        children // Render the children if provided
-                    ) : (
-                        options.map((option, index) => (
-                            <Pressable
-                                key={index}
-                                style={styles.optionButton}
-                                onPress={option.onPress}
-                            >
-                                <Text style={styles.optionText}>{option.label}</Text>
-                            </Pressable>
-                        ))
-                    )}
+                    {options.map((option, index) => (
+                        <Pressable
+                            key={index}
+                            style={styles.optionButton}
+                            onPress={option.onPress}
+                        >
+                            <Text style={styles.optionText}>{option.label}</Text>
+                        </Pressable>
+                    ))}
+                    <Pressable style={styles.closeButton} onPress={onClose}>
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </Pressable>
                 </View>
             </View>
         </Modal>
     );
 };
-
 
 const styles = StyleSheet.create({
     modalContainer: {
