@@ -83,7 +83,16 @@ function MainGallery() {
     );
 }
 
-function DrawerOptionScreen() {
+function DrawerOption() {
+    return (
+        <View style={styles.container}>
+            <Text style={styles.permissionText}>This is a drawer option!</Text>
+        </View>
+    );
+}
+
+
+function SetInterval() {
     return (
         <View style={styles.container}>
             <Text style={styles.permissionText}>This is a drawer option!</Text>
@@ -102,7 +111,8 @@ export default function GalleryAlbums() {
             }}
         >
             <Drawer.Screen name="Gallery" component={MainGallery} options={{ title: 'My Gallery' }} />
-            <Drawer.Screen name="Option" component={DrawerOptionScreen} options={{ title: 'Drawer Option' }} />
+            <Drawer.Screen name="Option" component={DrawerOption} options={{ title: 'Drawer Option' }} />
+            <Drawer.Screen name="Interval" component={SetInterval} options={{ title: 'Set Interval' }} />
         </Drawer.Navigator>
     );
 }
