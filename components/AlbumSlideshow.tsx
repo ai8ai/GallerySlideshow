@@ -26,6 +26,28 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
     const [modalVisible, setModalVisible] = useState(false);
 
+    const handleDeleteImage = () => {
+        const updatedImages = [...images];
+        updatedImages.splice(currentIndex, 1);
+        setImages(updatedImages);
+        setModalVisible(false);
+    };
+
+    const handleChangeInterval = () => {
+        console.log('Change Interval');
+        setModalVisible(false);
+    };
+
+    const handleHelp = () => {
+        console.log('Help clicked');
+        setModalVisible(false);
+    };
+    const modalOptions = [
+        { label: 'Change Interval', onPress: handleChangeInterval },
+        { label: 'Delete Current Image', onPress: handleDeleteImage },
+        { label: 'Help', onPress: handleHelp },
+    ];
+
     useEffect(() => {
         const fetchImages = async () => {
             try {
@@ -85,7 +107,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
             <CustomModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
-                message="Hello!"
+                options={modalOptions}
             />
         </View>
     );

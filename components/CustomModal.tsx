@@ -1,13 +1,19 @@
 import React from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 
+// interface CustomModalProps {
+//     visible: boolean; // Determines whether the modal is visible
+//     onClose: () => void; // Callback for closing the modal
+//     message: string; // Message to display in the modal
+// }
+
 interface CustomModalProps {
-    visible: boolean; // Determines whether the modal is visible
-    onClose: () => void; // Callback for closing the modal
-    message: string; // Message to display in the modal
+    visible: boolean;
+    onClose: () => void;
+    options: { label: string; onPress: () => void }[];
 }
 
-const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, message }) => {
+const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options  }) => {
     return (
         <Modal
             animationType="slide"
@@ -17,7 +23,15 @@ const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, message }) 
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalText}>{message}</Text>
+                    {options.map((option, index) => (
+                        <Pressable
+                            key={index}
+                            style={styles.optionButton}
+                            onPress={option.onPress}
+                        >
+                            <Text style={styles.optionText}>{option.label}</Text>
+                        </Pressable>
+                    ))}
                     <Pressable style={styles.closeButton} onPress={onClose}>
                         <Text style={styles.closeButtonText}>Close</Text>
                     </Pressable>
@@ -46,9 +60,16 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     },
-    modalText: {
-        fontSize: 18,
-        marginBottom: 15,
+    optionButton: {
+        width: '100%',
+        padding: 10,
+        marginBottom: 10,
+        backgroundColor: '#2196F3',
+        borderRadius: 5,
+    },
+    optionText: {
+        color: 'white',
+        fontWeight: 'bold',
         textAlign: 'center',
     },
     closeButton: {
