@@ -1,104 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Animated, Pressable } from 'react-native';
+import {
+    View,
+    Modal,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    Animated,
+    Pressable,
+} from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import useScaleAnimation from '@/hooks/useAnimations';
+import CustomModal from '@/components/CustomModal';
+import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; // Import the animation module
 
 interface AlbumSlideshowProps {
     album: MediaLibrary.Album;
 }
 
 const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
-    enum AnimationType {
-        Fade = 'fade',
-        Scale = 'scale',
-        Rotate = 'rotate',
-        Slide = 'slide',
-        Zoom = 'zoom',  // New Zoom type
-        Bounce = 'bounce',  // New Bounce type
-        Flip = 'flip',  // New Flip type
-        Wobble = 'wobble'  // New Wobble type
-    }
-
     const [images, setImages] = useState<string[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [firstImageLoaded, setFirstImageLoaded] = useState(false);  // Track if the first image is set
+    const [firstImageLoaded, setFirstImageLoaded] = useState(false);
     const { scaleAnim, animateImageChange } = useScaleAnimation();
     const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const getAnimationStyle = (animationType: AnimationType, scaleAnim: Animated.Value) => {
-        switch (animationType) {
-            case AnimationType.Fade:
-                return { opacity: scaleAnim }; // Fade
-
-            case AnimationType.Scale:
-                return { transform: [{ scale: scaleAnim }] }; // Scale
-
-            case AnimationType.Rotate:
-                return {
-                    transform: [
-                        {
-                            rotate: scaleAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: ['0deg', '10deg']
-                            })
-                        }
-                    ]
-                }; // Rotate
-
-            case AnimationType.Slide:
-                return {
-                    transform: [
-                        {
-                            translateX: scaleAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [-100, 0]  // Slide from left to right
-                            })
-                        }
-                    ]
-                }; // Slide
-
-            case AnimationType.Zoom:
-                return {
-                    opacity: scaleAnim,
-                    transform: [{ scale: scaleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) }]
-                }; // Zoom in/out
-
-            case AnimationType.Bounce:
-                return {
-                    transform: [{ scale: scaleAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.2, 1] }) }]
-                }; // Bounce
-
-            case AnimationType.Flip:
-                return {
-                    transform: [
-                        {
-                            rotateY: scaleAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: ['0deg', '180deg'] // Flip effect
-                            })
-                        }
-                    ]
-                }; // Flip
-
-            case AnimationType.Wobble:
-                return {
-                    transform: [
-                        {
-                            translateX: scaleAnim.interpolate({
-                                inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
-                                outputRange: [0, -15, 15, -15, 15, 0]  // Shake effect
-                            })
-                        }
-                    ]
-                }; // Wobble (Shake)
-
-            default:
-                return {}; // Default to no animation
-        }
-    };
-
-    // Fetch images only once the component is mounted
     useEffect(() => {
         const fetchImages = async () => {
             try {
@@ -107,7 +34,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
                     mediaType: MediaLibrary.MediaType.photo,
                 });
                 setImages(assets.assets.map((asset) => asset.uri));
-                setLoading(false); // Set loading to false once images are fetched
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching images:', error);
             }
@@ -115,15 +42,13 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         fetchImages();
     }, [album]);
 
-    // Start the image change interval only after images are loaded
     useEffect(() => {
         if (images.length > 0 && !firstImageLoaded) {
-            // Only trigger the first image animation after the images are loaded
             setFirstImageLoaded(true);
-            const animationTypes = Object.values(AnimationType);  // Get all enum values
+            const animationTypes = Object.values(AnimationType);
             const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
             setAnimationType(randomAnimation);
-            animateImageChange(() => setCurrentIndex(0)); // Set the first image immediately
+            animateImageChange(() => setCurrentIndex(0));
         }
     }, [images, firstImageLoaded, animateImageChange]);
 
@@ -131,11 +56,11 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         if (firstImageLoaded) {
             const interval = setInterval(() => {
                 const newIndex = Math.floor(Math.random() * images.length);
-                const animationTypes = Object.values(AnimationType);  // Get all enum values
+                const animationTypes = Object.values(AnimationType);
                 const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
                 setAnimationType(randomAnimation);
                 animateImageChange(() => setCurrentIndex(newIndex));
-            }, 5000); // Change image every 5 seconds
+            }, 5000);
 
             return () => clearInterval(interval);
         }
@@ -148,40 +73,29 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     return (
         <View style={styles.imageContainer}>
             <Animated.View
-                style={[
-                    styles.image,
-                    getAnimationStyle(animationType, scaleAnim),
-                ]}
+                style={[styles.image, getAnimationStyle(animationType, scaleAnim)]}
             >
-                <Pressable onPress={() => alert('Hi')} style={StyleSheet.absoluteFillObject}>
+                <Pressable onPress={() => setModalVisible(true)}>
                     <Animated.Image
                         source={{ uri: images[currentIndex] }}
                         style={styles.image}
                     />
                 </Pressable>
             </Animated.View>
+            <CustomModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                message="Hello!"
+            />
         </View>
     );
 };
-
-
 
 const styles = StyleSheet.create({
     imageContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    container: {
-        flex: 1,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#000',
     },
     image: {
         width: '100%',
