@@ -1,46 +1,56 @@
+import styles from '@/styles/styles'
+
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Animated, Pressable, StyleSheet, TextInput, Text } from 'react-native';
+import { View, ActivityIndicator, Animated, Pressable, } from 'react-native';
+
 import * as MediaLibrary from 'expo-media-library';
-import useSlideshowInterval from '@/hooks/useSlideshowInterval';
-import useImageAnimation from '@/hooks/useImageAnimation';
-import CustomModal from '@/components/CustomModal';
 
-const DEFAULT_INTERVAL = 5000;
+import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; 
 
-const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
-    const [images, setImages] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { currentIndex, updateIntervalTime, intervalTime } = useSlideshowInterval(images, DEFAULT_INTERVAL);
-    const { scaleAnim, animationType, animateImageChange, randomizeAnimationType } = useImageAnimation();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [isIntervalInputVisible, setIsIntervalInputVisible] = useState(false);
+import ImageOptionsModal from '@/components/ImageOptionsModal';
+
+import useScaleAnimation from '@/hooks/useAnimations';
+import useFetchImages from '@/hooks/useFetchImages';
+import useInterval from '@/hooks/useInterval';
+import useModalActions from '@/hooks/useModalActions';
+
+interface AlbumSlideshowProps {
+    album: MediaLibrary.Album;
+}
+
+const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [firstImageLoaded, setFirstImageLoaded] = useState(false);
+    const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
+
+    const { scaleAnim, animateImageChange } = useScaleAnimation();
+    const { images, setImages, loading } = useFetchImages(album);
+    const { savedIntervalValue, handleIntervalChange } = useInterval();
+    const {modalVisible,setModalVisible, isIntervalInputVisible,setIsIntervalInputVisible,modalOptions,} = useModalActions(images, currentIndex, setImages);
 
     useEffect(() => {
-        const fetchImages = async () => {
-            try {
-                const assets = await MediaLibrary.getAssetsAsync({
-                    album,
-                    mediaType: MediaLibrary.MediaType.photo,
-                });
-                setImages(assets.assets.map((asset) => asset.uri));
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching images:', error);
-            }
-        };
-        fetchImages();
-    }, [album]);
-
-    const handleImagePress = () => {
-        setModalVisible(true);
-    };
-
-    const handleIntervalChange = (text: string) => {
-        const newInterval = parseInt(text, 10);
-        if (!isNaN(newInterval)) {
-            updateIntervalTime(newInterval);
+        if (images.length > 0 && !firstImageLoaded) {
+            setFirstImageLoaded(true);
+            const animationTypes = Object.values(AnimationType);
+            const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+            setAnimationType(randomAnimation);
+            animateImageChange(() => setCurrentIndex(0));
         }
-    };
+    }, [images, firstImageLoaded, animateImageChange]);
+
+    useEffect(() => {
+        if (firstImageLoaded) {
+            const interval = setInterval(() => {
+                const newIndex = Math.floor(Math.random() * images.length);
+                const animationTypes = Object.values(AnimationType);
+                const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+                setAnimationType(randomAnimation);
+                animateImageChange(() => setCurrentIndex(newIndex));
+            }, 5000);
+
+            return () => clearInterval(interval);
+        }
+    }, [firstImageLoaded, images, animateImageChange]);
 
     if (loading) {
         return <ActivityIndicator style={styles.loading} size="large" color="#000" />;
@@ -48,71 +58,25 @@ const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
 
     return (
         <View style={styles.imageContainer}>
-            <Animated.View style={[styles.image, { transform: [{ scale: scaleAnim }] }]}>
-                <Pressable onPress={handleImagePress}>
-                    <Animated.Image source={{ uri: images[currentIndex] }} style={styles.image} />
-                </Pressable>
-            </Animated.View>
-            <CustomModal
-                visible={modalVisible}
-                onClose={() => {
-                    setModalVisible(false);
-                    setIsIntervalInputVisible(false);
-                }}
-            >
-                {isIntervalInputVisible ? (
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Enter Interval (ms)"
-                        keyboardType="numeric"
-                        value={intervalTime.toString()}
-                        onChangeText={handleIntervalChange}
-                    />
-                ) : (
-                    <>
-                        <Pressable onPress={() => setIsIntervalInputVisible(true)}>
-                            <Text style={styles.modalOption}>Change Interval</Text>
-                        </Pressable>
-                        <Pressable onPress={() => console.log('Delete Current Image')}>
-                            <Text style={styles.modalOption}>Delete Current Image</Text>
-                        </Pressable>
-                        <Pressable onPress={() => console.log('Help')}>
-                            <Text style={styles.modalOption}>Help</Text>
-                        </Pressable>
-                    </>
-                )}
-            </CustomModal>
-        </View>
+        <Animated.View style={[styles.image, getAnimationStyle(animationType, scaleAnim)]}>
+            <Pressable onPress={() => setModalVisible(true)}>
+                <Animated.Image source={{ uri: images[currentIndex] }} style={styles.image} />
+            </Pressable>
+        </Animated.View>
+        <ImageOptionsModal
+            visible={modalVisible}
+            onClose={() => {
+                setModalVisible(false);
+                setIsIntervalInputVisible(false);
+            }}
+            isIntervalInputVisible={isIntervalInputVisible}
+            savedIntervalValue={savedIntervalValue}
+            handleIntervalChange={handleIntervalChange}
+            modalOptions={modalOptions}
+        />
+    </View>
     );
 };
 
-const styles = StyleSheet.create({
-    imageContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    loading: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    textInput: {
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        marginBottom: 20,
-    },
-    modalOption: {
-        fontSize: 16,
-        padding: 10,
-        textAlign: 'center',
-    },
-});
 
 export default AlbumSlideshow;

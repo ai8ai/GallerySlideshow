@@ -3,6 +3,7 @@ import { View, StyleSheet, FlatList, Image, Text, TouchableOpacity, Alert } from
 import * as MediaLibrary from 'expo-media-library';
 import { router } from 'expo-router';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import styles from '@/styles/styles'
 
 // Define the extended Album type
 interface AlbumWithCover extends MediaLibrary.Album {
@@ -117,43 +118,3 @@ export default function GalleryAlbums() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f9f9f9',
-        padding: 10,
-    },
-    grid: {
-        justifyContent: 'space-between',
-    },
-    albumContainer: {
-        flex: 1,
-        margin: 5,
-        alignItems: 'center',
-        borderRadius: 10,
-        backgroundColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 2,
-    },
-    albumCover: {
-        width: 150,
-        height: 150,
-        borderRadius: 10,
-    },
-    albumTitle: {
-        marginTop: 8,
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#333',
-    },
-    permissionText: {
-        textAlign: 'center',
-        color: '#999',
-        fontSize: 16,
-        marginTop: 20,
-    },
-});

@@ -1,33 +1,37 @@
 import { useState, useEffect } from 'react';
 import { Animated } from 'react-native';
-import { AnimationType } from '@/utils/animationStyles';
+import { AnimationType, getAnimationStyle } from '@/utils/animationStyles';
 
-const useImageAnimation = () => {
-    const [scaleAnim] = useState(new Animated.Value(1));
+const useImageAnimation = (images: string[], setCurrentIndex: (index: number) => void) => {
     const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
+    const scaleAnim = new Animated.Value(1);
 
-    const animateImageChange = (callback: () => void) => {
-        Animated.sequence([
-            Animated.timing(scaleAnim, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }),
-            Animated.timing(scaleAnim, {
-                toValue: 1,
-                duration: 300,
-                useNativeDriver: true,
-            }),
-        ]).start(callback);
-    };
+    useEffect(() => {
+        if (images.length > 0) {
+            const interval = setInterval(() => {
+                const newIndex = Math.floor(Math.random() * images.length);
+                const animationTypes = Object.values(AnimationType);
+                const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+                setAnimationType(randomAnimation);
+                Animated.timing(scaleAnim, {
+                    toValue: 0.5,
+                    duration: 1500,
+                    useNativeDriver: true,
+                }).start(() => {
+                    setCurrentIndex(newIndex);
+                    Animated.timing(scaleAnim, {
+                        toValue: 1,
+                        duration: 3500,
+                        useNativeDriver: true,
+                    }).start();
+                });
+            }, 5000);
 
-    const randomizeAnimationType = () => {
-        const animationTypes = Object.values(AnimationType);
-        const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
-        setAnimationType(randomAnimation);
-    };
+            return () => clearInterval(interval);
+        }
+    }, [images]);
 
-    return { scaleAnim, animationType, animateImageChange, randomizeAnimationType };
+    return { animationType, scaleAnim };
 };
 
 export default useImageAnimation;

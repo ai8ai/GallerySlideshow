@@ -4,7 +4,7 @@ import { Modal, View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 
 interface CustomModalProps {
     visible: boolean;
     onClose: () => void;
-    options: { label: string; onPress: () => void }[];
+    options?: { label: string; onPress: () => void }[];
     children?: React.ReactNode;
 }
 
@@ -18,7 +18,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options, ch
                     {children ? (
                         children // Render the children if provided
                     ) : (
-                        options.map((option, index) => {
+                        options?.map((option, index) => {
                             switch (index) {
                                 case 0: // Treat modalOptions[0] as a TextInput with labels
                                     return (
