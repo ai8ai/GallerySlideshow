@@ -7,15 +7,15 @@ const useScaleAnimation = () => {
     const animateImageChange = (onAnimationComplete: () => void) => {
         // Fade out the current image
         Animated.timing(scaleAnim, {
-            toValue: 0.9, // Fade out the current image
-            duration: 2500, // Smooth fade-out duration
+            toValue: 0.5, // Fade out the current image
+            duration: 1500, // Smooth fade-out duration
             useNativeDriver: true,
         }).start(() => {
             onAnimationComplete(); // Callback to update the image
             // Fade in the new image
             Animated.timing(scaleAnim, {
                 toValue: 1, // Fade in the new image
-                duration: 8500, // Smooth fade-in duration
+                duration: 3500, // Smooth fade-in duration
                 useNativeDriver: true,
             }).start();
         });
