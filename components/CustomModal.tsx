@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, Pressable, StyleSheet,Dimensions } from 'react-native';
+import { Modal, View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 
 interface CustomModalProps {
     visible: boolean;
@@ -18,15 +18,36 @@ const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options, ch
                     {children ? (
                         children // Render the children if provided
                     ) : (
-                        options.map((option, index) => (
-                            <Pressable
-                                key={index}
-                                style={styles.optionButton}
-                                onPress={option.onPress}
-                            >
-                                <Text style={styles.optionText}>{option.label}</Text>
-                            </Pressable>
-                        ))
+                        options.map((option, index) => {
+                            switch (index) {
+                                case 0: // Treat modalOptions[0] as a TextInput with labels
+                                    return (
+                                        <View key={index} style={styles.inputRow}>
+                                            <Text style={styles.label}>Interval:</Text>
+                                            <TextInput
+                                                style={styles.textInput}
+                                                placeholder={option.label}
+                                                value={option.value} // Controlled value for TextInput
+                                                onChangeText={option.onInputChange} // Handle text changes
+                                                keyboardType="numeric" // Optional: Use numeric keyboard
+                                            />
+                                            <Text style={styles.label}>seconds</Text>
+                                        </View>
+                                    );
+                                case 1: // Treat modalOptions[1] as a button
+                                case 2: // Treat modalOptions[2] as a button
+                                default:
+                                    return (
+                                        <Pressable
+                                            key={index}
+                                            style={styles.optionButton}
+                                            onPress={option.onPress}
+                                        >
+                                            <Text style={styles.optionText}>{option.label}</Text>
+                                        </Pressable>
+                                    );
+                            }
+                        })
                     )}
                 </View>
             </View>
@@ -43,28 +64,16 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: screenWidth*0.75 ,
+        width: screenWidth * 0.85,
         padding: 20,
-        backgroundColor: 'white',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
         borderRadius: 10,
-        alignItems: 'center',
+        alignItems: 'flex-start',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    },
-    optionButton: {
-        width: '100%',
-        padding: 10,
-        marginBottom: 10,
-        backgroundColor: '#2196F3',
-        borderRadius: 5,
-    },
-    optionText: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
     },
     closeButton: {
         backgroundColor: '#2196F3',
@@ -76,6 +85,45 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    inputContainer: {
+        marginBottom: 10,
+    },
+    textInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        fontSize: 16,
+    },
+    optionButton: {
+        padding: 10,
+        marginVertical: 5,
+        backgroundColor: '#007BFF',
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    optionText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    label: {
+        fontSize: 16,
+        marginRight: 8,
+    },
+    textInput2: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 8,
+        fontSize: 16,
+        flex: 1,
+        marginRight: 8,
     },
 });
 

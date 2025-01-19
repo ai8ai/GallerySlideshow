@@ -1,64 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, Modal, Text, TextInput, StyleSheet, ActivityIndicator, Animated, Pressable, } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { View, ActivityIndicator, Animated, Pressable, StyleSheet, TextInput, Text } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-
-import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; // Import the animation module
-import useScaleAnimation from '@/hooks/useAnimations';
+import useSlideshowInterval from '@/hooks/useSlideshowInterval';
+import useImageAnimation from '@/hooks/useImageAnimation';
 import CustomModal from '@/components/CustomModal';
-import getSavedIntervalTime from '@/utils/IntervalTimeModule'; // Import the interval time module
 
 const DEFAULT_INTERVAL = 5000;
 
-interface AlbumSlideshowProps {
-    album: MediaLibrary.Album;
-}
-
-const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
+const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
     const [images, setImages] = useState<string[]>([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [firstImageLoaded, setFirstImageLoaded] = useState(false);
-    const { scaleAnim, animateImageChange } = useScaleAnimation();
-    const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
+    const { currentIndex, updateIntervalTime, intervalTime } = useSlideshowInterval(images, DEFAULT_INTERVAL);
+    const { scaleAnim, animationType, animateImageChange, randomizeAnimationType } = useImageAnimation();
     const [modalVisible, setModalVisible] = useState(false);
-
     const [isIntervalInputVisible, setIsIntervalInputVisible] = useState(false);
-    const [savedIntervalValue, setSavedIntervalValue] = useState<string | undefined>(undefined);
-
-    const handleDeleteImage = () => {
-        const updatedImages = [...images];
-        updatedImages.splice(currentIndex, 1);
-        setImages(updatedImages);
-        setModalVisible(false);
-    };
-
-    const handleChangeInterval = () => {
-        setIsIntervalInputVisible(true); // Show the text input
-    };
-
-    const handleHelp = () => {
-        console.log('Help clicked');
-        setModalVisible(false);
-    };
-    const modalOptions = [
-        { label: 'Change Interval', onPress: handleChangeInterval },
-        { label: 'Delete Current Image', onPress: handleDeleteImage },
-        { label: 'Help', onPress: handleHelp },
-    ];
-
-    useEffect(() => {
-        const fetchInterval = async () => {
-            const interval = await getSavedIntervalTime();
-            setSavedIntervalValue(interval.toString()); // Convert to string for TextInput
-        };
-        fetchInterval();
-    }, []);
-
-    const handleIntervalChange = (text: string) => {
-        setSavedIntervalValue(text); // Update the state as the user types
-    };
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -76,29 +31,16 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         fetchImages();
     }, [album]);
 
-    useEffect(() => {
-        if (images.length > 0 && !firstImageLoaded) {
-            setFirstImageLoaded(true);
-            const animationTypes = Object.values(AnimationType);
-            const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
-            setAnimationType(randomAnimation);
-            animateImageChange(() => setCurrentIndex(0));
-        }
-    }, [images, firstImageLoaded, animateImageChange]);
+    const handleImagePress = () => {
+        setModalVisible(true);
+    };
 
-    useEffect(() => {
-        if (firstImageLoaded) {
-            const interval = setInterval(() => {
-                const newIndex = Math.floor(Math.random() * images.length);
-                const animationTypes = Object.values(AnimationType);
-                const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
-                setAnimationType(randomAnimation);
-                animateImageChange(() => setCurrentIndex(newIndex));
-            }, 5000);
-
-            return () => clearInterval(interval);
+    const handleIntervalChange = (text: string) => {
+        const newInterval = parseInt(text, 10);
+        if (!isNaN(newInterval)) {
+            updateIntervalTime(newInterval);
         }
-    }, [firstImageLoaded, images, animateImageChange]);
+    };
 
     if (loading) {
         return <ActivityIndicator style={styles.loading} size="large" color="#000" />;
@@ -106,32 +48,38 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
 
     return (
         <View style={styles.imageContainer}>
-            <Animated.View
-                style={[styles.image, getAnimationStyle(animationType, scaleAnim)]}
-            >
-                <Pressable onPress={() => setModalVisible(true)}>
-                    <Animated.Image
-                        source={{ uri: images[currentIndex] }}
-                        style={styles.image}
-                    />
+            <Animated.View style={[styles.image, { transform: [{ scale: scaleAnim }] }]}>
+                <Pressable onPress={handleImagePress}>
+                    <Animated.Image source={{ uri: images[currentIndex] }} style={styles.image} />
                 </Pressable>
             </Animated.View>
             <CustomModal
                 visible={modalVisible}
                 onClose={() => {
                     setModalVisible(false);
-                    setIsIntervalInputVisible(false); // Reset input visibility when closing
+                    setIsIntervalInputVisible(false);
                 }}
-                options={!isIntervalInputVisible ? modalOptions : []} // Hide default options when input is active
             >
-                {isIntervalInputVisible && (
+                {isIntervalInputVisible ? (
                     <TextInput
                         style={styles.textInput}
                         placeholder="Enter Interval (ms)"
                         keyboardType="numeric"
-                        value={savedIntervalValue} // Set initial value from savedIntervalValue
-                        onChangeText={handleIntervalChange} // Update state on input change
+                        value={intervalTime.toString()}
+                        onChangeText={handleIntervalChange}
                     />
+                ) : (
+                    <>
+                        <Pressable onPress={() => setIsIntervalInputVisible(true)}>
+                            <Text style={styles.modalOption}>Change Interval</Text>
+                        </Pressable>
+                        <Pressable onPress={() => console.log('Delete Current Image')}>
+                            <Text style={styles.modalOption}>Delete Current Image</Text>
+                        </Pressable>
+                        <Pressable onPress={() => console.log('Help')}>
+                            <Text style={styles.modalOption}>Help</Text>
+                        </Pressable>
+                    </>
                 )}
             </CustomModal>
         </View>
@@ -159,6 +107,11 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderRadius: 5,
         marginBottom: 20,
+    },
+    modalOption: {
+        fontSize: 16,
+        padding: 10,
+        textAlign: 'center',
     },
 });
 
