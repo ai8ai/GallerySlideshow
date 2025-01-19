@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Modal, View, Text, Pressable, StyleSheet,Dimensions } from 'react-native';
 
 interface CustomModalProps {
     visible: boolean;
@@ -7,6 +7,8 @@ interface CustomModalProps {
     options: { label: string; onPress: () => void }[];
     children?: React.ReactNode;
 }
+
+const screenWidth = Dimensions.get('window').width;
 
 const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options, children }) => {
     return (
@@ -36,12 +38,12 @@ const CustomModal: React.FC<CustomModalProps> = ({ visible, onClose, options, ch
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: 250,
+        width: screenWidth*0.75 ,
         padding: 20,
         backgroundColor: 'white',
         borderRadius: 10,

@@ -7,7 +7,6 @@ import * as MediaLibrary from 'expo-media-library';
 import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; // Import the animation module
 import useScaleAnimation from '@/hooks/useAnimations';
 import CustomModal from '@/components/CustomModal';
-import getSavedIntervalTime from '@/utils/IntervalTimeModule'; // Import the interval time module
 
 const DEFAULT_INTERVAL = 5000;
 
@@ -23,9 +22,30 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const { scaleAnim, animateImageChange } = useScaleAnimation();
     const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
     const [modalVisible, setModalVisible] = useState(false);
-
     const [isIntervalInputVisible, setIsIntervalInputVisible] = useState(false);
-    const [savedIntervalValue, setSavedIntervalValue] = useState<string | undefined>(undefined);
+
+    const [savedIntervalTime, setSavedIntervalTime] = useState<number | null>(null);
+
+    const getIntervalTime = async () => {
+        try {
+            const storedTime = await AsyncStorage.getItem('intervalTime');
+            return storedTime ? parseInt(storedTime, 10) : null;
+        } catch (error) {
+            console.error('Failed to retrieve interval time:', error);
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        const fetchIntervalTime = async () => {
+            const savedTime = await getIntervalTime();
+            if (savedTime) {
+                setIntervalTime(savedTime);
+            }
+        };
+        fetchIntervalTime();
+    }, []);
+
 
     const handleDeleteImage = () => {
         const updatedImages = [...images];
@@ -47,18 +67,6 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         { label: 'Delete Current Image', onPress: handleDeleteImage },
         { label: 'Help', onPress: handleHelp },
     ];
-
-    useEffect(() => {
-        const fetchInterval = async () => {
-            const interval = await getSavedIntervalTime();
-            setSavedIntervalValue(interval.toString()); // Convert to string for TextInput
-        };
-        fetchInterval();
-    }, []);
-
-    const handleIntervalChange = (text: string) => {
-        setSavedIntervalValue(text); // Update the state as the user types
-    };
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -129,8 +137,6 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
                         style={styles.textInput}
                         placeholder="Enter Interval (ms)"
                         keyboardType="numeric"
-                        value={savedIntervalValue} // Set initial value from savedIntervalValue
-                        onChangeText={handleIntervalChange} // Update state on input change
                     />
                 )}
             </CustomModal>
