@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Image, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-
+import useScaleAnimation from '@/hooks/useAnimations';
 
 interface AlbumSlideshowProps {
     album: MediaLibrary.Album;
@@ -11,11 +11,10 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const [images, setImages] = useState<string[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0)).current;
-    const rotateAnimRef = useRef(new Animated.Value(0)).current;
-    const slideAnimRef = useRef(new Animated.Value(0)).current;
+    const [firstImageLoaded, setFirstImageLoaded] = useState(false);  // Track if the first image is set
+    const { scaleAnim, animateImageChange } = useScaleAnimation();
 
+    // Fetch images only once the component is mounted
     useEffect(() => {
         const fetchImages = async () => {
             try {
@@ -24,51 +23,33 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
                     mediaType: MediaLibrary.MediaType.photo,
                 });
                 setImages(assets.assets.map((asset) => asset.uri));
-                setLoading(false);
+                setLoading(false); // Set loading to false once images are fetched
             } catch (error) {
                 console.error('Error fetching images:', error);
             }
         };
         fetchImages();
+    }, [album]);
 
+    // Start the image change interval only after images are loaded
+    useEffect(() => {
+        if (images.length > 0 && !firstImageLoaded) {
+            // Only trigger the first image animation after the images are loaded
+            setFirstImageLoaded(true);
+            animateImageChange(() => setCurrentIndex(0)); // Set the first image immediately
+        }
+    }, [images, firstImageLoaded, animateImageChange]);
 
-        const interval = setInterval(() => {
-            const newIndex = Math.floor(Math.random() * images.length);
-            const randomAnimation = Math.random() > 0.5 ? 'fade' : 'scale';
+    useEffect(() => {
+        if (firstImageLoaded) {
+            const interval = setInterval(() => {
+                const newIndex = Math.floor(Math.random() * images.length);
+                animateImageChange(() => setCurrentIndex(newIndex));
+            }, 5000); // Change image every 5 seconds
 
-            if (randomAnimation === 'fade') {
-                Animated.timing(fadeAnim, {
-                    toValue: 0.5, // Fade out the current image
-                    duration: 1500, // Smooth fade-out duration
-                    useNativeDriver: true,
-                }).start(() => {
-                    setCurrentIndex(newIndex); // Update the image
-                    Animated.timing(fadeAnim, {
-                        toValue: 1, // Fade in the new image
-                        duration: 3500, // Smooth fade-in duration
-                        useNativeDriver: true,
-                    }).start();
-                });
-            } else {
-                Animated.sequence([
-                    Animated.timing(scaleAnim, {
-                        toValue: 1.05,
-                        duration: 500,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(scaleAnim, {
-                        toValue: 1,
-                        duration: 1500,
-                        useNativeDriver: true,
-                    }),
-                ]).start(() => {
-                    setCurrentIndex(newIndex);
-                });
-            }
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [album, images.length]);
+            return () => clearInterval(interval);
+        }
+    }, [firstImageLoaded, images, animateImageChange]);
 
     if (loading) {
         return <ActivityIndicator style={styles.loading} size="large" color="#000" />;
@@ -82,7 +63,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
                     style={[
                         styles.image,
                         {
-                            opacity: fadeAnim,
+                            opacity: scaleAnim,
                             transform: [{ scale: scaleAnim }],
                         },
                     ]}
@@ -93,7 +74,6 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
 };
 
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
         position: 'absolute',
@@ -105,12 +85,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#000',
     },
-
-
     image: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover', //contain
+        resizeMode: 'cover',
     },
     loading: {
         flex: 1,
