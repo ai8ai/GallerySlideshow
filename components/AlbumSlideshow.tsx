@@ -11,7 +11,10 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const [images, setImages] = useState<string[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
-    const fadeAnim = useRef(new Animated.Value(1)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const rotateAnimRef = useRef(new Animated.Value(0)).current;
+    const slideAnimRef = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -27,21 +30,41 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
             }
         };
         fetchImages();
+
+
         const interval = setInterval(() => {
             const newIndex = Math.floor(Math.random() * images.length);
+            const randomAnimation = Math.random() > 0.5 ? 'fade' : 'scale';
 
-            Animated.timing(fadeAnim, {
-                toValue: 0, // Fade out the current image
-                duration: 2500, // Smooth fade-out duration
-                useNativeDriver: true,
-            }).start(() => {
-                setCurrentIndex(newIndex); // Update the image
+            if (randomAnimation === 'fade') {
                 Animated.timing(fadeAnim, {
-                    toValue: 1, // Fade in the new image
-                    duration: 3500, // Smooth fade-in duration
+                    toValue: 0.5, // Fade out the current image
+                    duration: 1500, // Smooth fade-out duration
                     useNativeDriver: true,
-                }).start();
-            });
+                }).start(() => {
+                    setCurrentIndex(newIndex); // Update the image
+                    Animated.timing(fadeAnim, {
+                        toValue: 1, // Fade in the new image
+                        duration: 3500, // Smooth fade-in duration
+                        useNativeDriver: true,
+                    }).start();
+                });
+            } else {
+                Animated.sequence([
+                    Animated.timing(scaleAnim, {
+                        toValue: 1.05,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(scaleAnim, {
+                        toValue: 1,
+                        duration: 1500,
+                        useNativeDriver: true,
+                    }),
+                ]).start(() => {
+                    setCurrentIndex(newIndex);
+                });
+            }
         }, 5000);
 
         return () => clearInterval(interval);
@@ -54,7 +77,16 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     return (
         <View style={styles.container}>
             {images.length > 0 && (
-                <Animated.Image source={{ uri: images[currentIndex] }} style={[styles.image, { opacity: fadeAnim }]} />
+                <Animated.Image
+                    source={{ uri: images[currentIndex] }}
+                    style={[
+                        styles.image,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ scale: scaleAnim }],
+                        },
+                    ]}
+                />
             )}
         </View>
     );
