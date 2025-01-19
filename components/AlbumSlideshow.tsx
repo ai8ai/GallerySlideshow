@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Image, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 
 
@@ -11,6 +11,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const [images, setImages] = useState<string[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const fadeAnim = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -26,11 +27,22 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
             }
         };
         fetchImages();
-
         const interval = setInterval(() => {
-            // setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-            setCurrentIndex(() => Math.floor(Math.random() * images.length));
-        }, 2000); // Change image every 3 seconds
+            const newIndex = Math.floor(Math.random() * images.length);
+
+            Animated.timing(fadeAnim, {
+                toValue: 0, // Fade out the current image
+                duration: 2500, // Smooth fade-out duration
+                useNativeDriver: true,
+            }).start(() => {
+                setCurrentIndex(newIndex); // Update the image
+                Animated.timing(fadeAnim, {
+                    toValue: 1, // Fade in the new image
+                    duration: 3500, // Smooth fade-in duration
+                    useNativeDriver: true,
+                }).start();
+            });
+        }, 5000);
 
         return () => clearInterval(interval);
     }, [album, images.length]);
@@ -42,7 +54,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     return (
         <View style={styles.container}>
             {images.length > 0 && (
-                <Image source={{ uri: images[currentIndex] }} style={styles.image} />
+                <Animated.Image source={{ uri: images[currentIndex] }} style={[styles.image, { opacity: fadeAnim }]} />
             )}
         </View>
     );
@@ -61,8 +73,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#000',
     },
-    
-    
+
+
     image: {
         width: '100%',
         height: '100%',
