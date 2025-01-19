@@ -13,6 +13,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const [loading, setLoading] = useState(true);
     const [firstImageLoaded, setFirstImageLoaded] = useState(false);  // Track if the first image is set
     const { scaleAnim, animateImageChange } = useScaleAnimation();
+    const [animationType, setAnimationType] = useState<'fade' | 'scale'>('scale');
 
     // Fetch images only once the component is mounted
     useEffect(() => {
@@ -36,6 +37,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         if (images.length > 0 && !firstImageLoaded) {
             // Only trigger the first image animation after the images are loaded
             setFirstImageLoaded(true);
+            setAnimationType(Math.random() > 0.5 ? 'fade' : 'scale');
             animateImageChange(() => setCurrentIndex(0)); // Set the first image immediately
         }
     }, [images, firstImageLoaded, animateImageChange]);
@@ -44,6 +46,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
         if (firstImageLoaded) {
             const interval = setInterval(() => {
                 const newIndex = Math.floor(Math.random() * images.length);
+                setAnimationType(Math.random() > 0.5 ? 'fade' : 'scale');
                 animateImageChange(() => setCurrentIndex(newIndex));
             }, 5000); // Change image every 5 seconds
 
@@ -62,10 +65,9 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
                     source={{ uri: images[currentIndex] }}
                     style={[
                         styles.image,
-                        {
-                            opacity: scaleAnim,
-                            transform: [{ scale: scaleAnim }],
-                        },
+                        animationType === 'fade'
+                            ? { opacity: scaleAnim } // Apply fade animation
+                            : { transform: [{ scale: scaleAnim }] }, // Apply scale animation
                     ]}
                 />
             )}
