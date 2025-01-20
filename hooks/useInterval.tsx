@@ -7,7 +7,7 @@ const useInterval = () => {
     useEffect(() => {
         const fetchInterval = async () => {
             const interval = await getSavedIntervalTime();
-            setSavedIntervalValue(interval.toString());
+            setSavedIntervalValue(interval?.toString() || '5000');
         };
         fetchInterval();
     }, []);
