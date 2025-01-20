@@ -8,12 +8,14 @@ const useInterval = () => {
 
     useEffect(() => {
         const fetchInterval = async () => {
-            const interval = await AsyncStorage.getItem('savedInterval');
-            if (interval) {
-                setSavedIntervalValue(interval?.toString() || '5');
-                setIntervalInput(interval);
-                setIntervalDuration(parseInt(interval, 10) * 1000); // Convert to milliseconds
+            let interval = await AsyncStorage.getItem('savedInterval');
+            if (!interval) {
+                interval = '5'; // Default value if none is found
+                await AsyncStorage.setItem('savedInterval', interval);
             }
+            setSavedIntervalValue(interval?.toString() || '5');
+            setIntervalInput(interval);
+            setIntervalDuration(parseInt(interval, 10) * 1000); // Convert to milliseconds
         };
         fetchInterval();
     }, []);
