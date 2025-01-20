@@ -92,20 +92,20 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     label: {
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 12,
         color: 'white',
         marginRight: 8,
     },
     textInput: {
         borderWidth: 1,
+        fontWeight: 'bold',
         color: 'white',
-        borderColor: '#ccc',
+        borderColor: 'white',
         borderRadius: 5,
-        padding: 8,
+        padding: 18,
         fontSize: 16,
         flex: 1,
-        marginRight: 8,
+        marginRight: 18,
     },
 
 

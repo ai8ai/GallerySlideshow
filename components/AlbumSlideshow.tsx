@@ -1,6 +1,6 @@
 import styles from '@/styles/styles'
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Animated, Pressable, } from 'react-native';
+import { Button, Text, TextInput, View, ActivityIndicator, Animated, Pressable, Modal } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 
 import { AnimationType, getAnimationStyle } from '@/utils/animationStyles';
@@ -10,6 +10,7 @@ import useScaleAnimation from '@/hooks/useAnimations';
 import useFetchImages from '@/hooks/useFetchImages';
 import useInterval from '@/hooks/useInterval';
 import useModalActions from '@/hooks/useModalActions';
+import CustomModal from '@/components/CustomModal';
 
 interface AlbumSlideshowProps {
     album: MediaLibrary.Album;
@@ -24,6 +25,7 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     const { images, setImages, loading } = useFetchImages(album);
     const { savedIntervalValue, handleIntervalChange } = useInterval();
     const { modalVisible, setModalVisible, isIntervalInputVisible, setIsIntervalInputVisible, modalOptions, } = useModalActions(images, currentIndex, setImages);
+    const [intervalInput, setIntervalInput] = useState('5000');
 
     useEffect(() => {
         if (images.length > 0 && !firstImageLoaded) {
@@ -37,14 +39,13 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
 
     useEffect(() => {
         if (firstImageLoaded) {
-            const intervalDuration = parseInt(savedIntervalValue || '5000', 10); // Fallback in case savedIntervalValue is undefined
             const interval = setInterval(() => {
                 const newIndex = Math.floor(Math.random() * images.length);
                 const animationTypes = Object.values(AnimationType);
                 const randomAnimation = animationTypes[Math.floor(Math.random() * animationTypes.length)];
                 setAnimationType(randomAnimation);
                 animateImageChange(() => setCurrentIndex(newIndex));
-            }, intervalDuration);
+            }, 5000);
 
             return () => clearInterval(interval);
         }
@@ -61,17 +62,35 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
                     <Animated.Image source={{ uri: images[currentIndex] }} style={styles.image} />
                 </Pressable>
             </Animated.View>
-            <ImageOptionsModal
+            <Modal
+                transparent={true}
+                animationType="slide"
                 visible={modalVisible}
-                onClose={() => {
-                    setModalVisible(false);
-                    setIsIntervalInputVisible(false);
-                }}
-                isIntervalInputVisible={isIntervalInputVisible}
-                savedIntervalValue={savedIntervalValue}
-                handleIntervalChange={handleIntervalChange}
-                modalOptions={modalOptions}
-            />
+                onRequestClose={() => setModalVisible(false)} // Handles Android back button
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.inputRow}>
+                            <Text style={styles.label}>Interval (seconds):</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                value={intervalInput}
+                                onChangeText={(text) => {
+                                    const numericValue = parseInt(text, 10);
+                                    if (!isNaN(numericValue) && numericValue >= 1 && numericValue <= 99) {
+                                        setIntervalInput(text);
+                                    } else if (text === '') {
+                                        setIntervalInput('');
+                                    }
+                                }}
+                                keyboardType="numeric"
+                                placeholder="Enter interval in ms (1-99)"
+                            />
+                            <Button title="Save" onPress={() => setModalVisible(false)} />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
