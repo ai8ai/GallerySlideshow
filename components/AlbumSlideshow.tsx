@@ -4,19 +4,14 @@ import { Button, Text, TextInput, View, ActivityIndicator, Animated, Pressable, 
 import * as MediaLibrary from 'expo-media-library';
 
 import { AnimationType, getAnimationStyle } from '@/utils/animationStyles';
-import ImageOptionsModal from '@/components/ImageOptionsModal';
 
 import useScaleAnimation from '@/hooks/useAnimations';
 import useFetchImages from '@/hooks/useFetchImages';
 import useInterval from '@/hooks/useInterval';
 import useModalActions from '@/hooks/useModalActions';
-import CustomModal from '@/components/CustomModal';
 
-interface AlbumSlideshowProps {
-    album: MediaLibrary.Album;
-}
 
-const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
+const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [firstImageLoaded, setFirstImageLoaded] = useState(false);
     const [animationType, setAnimationType] = useState<AnimationType>(AnimationType.Scale);
