@@ -1,3 +1,4 @@
+import styles from '@/styles/styles'
 import { Animated } from 'react-native';
 
 export enum AnimationType {

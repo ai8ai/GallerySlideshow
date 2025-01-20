@@ -1,12 +1,9 @@
 import styles from '@/styles/styles'
-
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Animated, Pressable, } from 'react-native';
-
 import * as MediaLibrary from 'expo-media-library';
 
 import { AnimationType, getAnimationStyle } from '@/utils/animationStyles'; 
-
 import ImageOptionsModal from '@/components/ImageOptionsModal';
 
 import useScaleAnimation from '@/hooks/useAnimations';
@@ -77,6 +74,5 @@ const AlbumSlideshow: React.FC<AlbumSlideshowProps> = ({ album }) => {
     </View>
     );
 };
-
 
 export default AlbumSlideshow;

@@ -1,9 +1,9 @@
+import styles from '@/styles/styles'
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Image, Text, TouchableOpacity, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { router } from 'expo-router';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import styles from '@/styles/styles'
 
 // Define the extended Album type
 interface AlbumWithCover extends MediaLibrary.Album {
