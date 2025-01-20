@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const useInterval = () => {
     const [savedIntervalValue, setSavedIntervalValue] = useState<string | undefined>(undefined);
     const [intervalInput, setIntervalInput] = useState<string | undefined>(undefined);
+    const [intervalDuration, setIntervalDuration] = useState<number>(5);
 
     useEffect(() => {
         const fetchInterval = async () => {
@@ -11,6 +12,7 @@ const useInterval = () => {
             if (interval) {
                 setSavedIntervalValue(interval?.toString() || '5');
                 setIntervalInput(interval);
+                setIntervalDuration(parseInt(interval, 10) * 1000); // Convert to milliseconds
             }
         };
         fetchInterval();
@@ -29,10 +31,11 @@ const useInterval = () => {
         if (intervalInput) {
             await AsyncStorage.setItem('savedInterval', intervalInput);
             setSavedIntervalValue(intervalInput);
+            setIntervalDuration(parseInt(intervalInput, 10) * 1000); // Convert to milliseconds
         }
     };
 
-    return { savedIntervalValue, intervalInput, handleIntervalChange, saveInterval };
+    return { savedIntervalValue, intervalInput, handleIntervalChange, saveInterval, intervalDuration };
 };
 
 export default useInterval;

@@ -84,22 +84,15 @@ function MainGallery() {
     );
 }
 
-function DrawerOption() {
+function RateTheApp() {
     return (
         <View style={styles.container}>
-            <Text style={styles.permissionText}>This is a drawer option!</Text>
+            <Text style={styles.permissionText}>coming soon!</Text>
         </View>
     );
 }
 
 
-function SetInterval() {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.permissionText}>This is a drawer option!</Text>
-        </View>
-    );
-}
 
 export default function GalleryAlbums() {
     return (
@@ -112,8 +105,7 @@ export default function GalleryAlbums() {
             }}
         >
             <Drawer.Screen name="Gallery" component={MainGallery} options={{ title: 'My Gallery' }} />
-            <Drawer.Screen name="Option" component={DrawerOption} options={{ title: 'Drawer Option' }} />
-            <Drawer.Screen name="Interval" component={SetInterval} options={{ title: 'Set Interval' }} />
+            <Drawer.Screen name="Rate"    component={RateTheApp} options={{ title: '5 star!' }} />
         </Drawer.Navigator>
     );
 }
