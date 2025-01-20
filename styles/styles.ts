@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 12,
         color: 'white',
-        marginRight: 8,
+        marginRight: 2,
     },
     textInput: {
         borderWidth: 1,

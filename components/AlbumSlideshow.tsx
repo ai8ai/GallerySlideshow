@@ -18,9 +18,8 @@ const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
 
     const { scaleAnim, animateImageChange } = useScaleAnimation();
     const { images, setImages, loading } = useFetchImages(album);
-    const { savedIntervalValue, handleIntervalChange } = useInterval();
+    const { savedIntervalValue, intervalInput, handleIntervalChange, saveInterval } = useInterval();
     const { modalVisible, setModalVisible, isIntervalInputVisible, setIsIntervalInputVisible, modalOptions, } = useModalActions(images, currentIndex, setImages);
-    const [intervalInput, setIntervalInput] = useState('5000');
 
     useEffect(() => {
         if (images.length > 0 && !firstImageLoaded) {
@@ -66,22 +65,14 @@ const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <View style={styles.inputRow}>
-                            <Text style={styles.label}>Interval (seconds):</Text>
+                            <Text style={styles.label}>Interval (1 - 99 s):</Text>
                             <TextInput
                                 style={styles.textInput}
                                 value={intervalInput}
-                                onChangeText={(text) => {
-                                    const numericValue = parseInt(text, 10);
-                                    if (!isNaN(numericValue) && numericValue >= 1 && numericValue <= 99) {
-                                        setIntervalInput(text);
-                                    } else if (text === '') {
-                                        setIntervalInput('');
-                                    }
-                                }}
+                                onChangeText={handleIntervalChange}
                                 keyboardType="numeric"
-                                placeholder="Enter interval in ms (1-99)"
                             />
-                            <Button title="Save" onPress={() => setModalVisible(false)} />
+                            <Button title="Save" onPress={() => { saveInterval(); setModalVisible(false); }} />
                         </View>
                     </View>
                 </View>
