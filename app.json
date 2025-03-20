@@ -16,6 +16,10 @@
                 "foregroundImage": "./assets/images/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
+            "permissions": [
+                "READ_EXTERNAL_STORAGE", // For Android 12 and below
+                "READ_MEDIA_IMAGES" // For Android 13 and above
+            ],
             "package": "com.aixpertlab.GallerySlideshow"
         },
         "web": {
