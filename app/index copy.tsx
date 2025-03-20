@@ -1,15 +1,6 @@
-import styles from '@/styles/styles';
+import styles from '@/styles/styles'
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    FlatList,
-    Image,
-    Text,
-    TouchableOpacity,
-    Alert,
-    PermissionsAndroid,
-    Platform,
-} from 'react-native';
+import { View, StyleSheet, FlatList, Image, Text, TouchableOpacity, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { router } from 'expo-router';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -27,33 +18,12 @@ function MainGallery() {
 
     useEffect(() => {
         const getPermissions = async () => {
-            try {
-                // Request only photo permissions on Android
-                let permission;
-                const androidVersion = typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version;
-
-                if (androidVersion >= 33) {
-                    // Android 13+ requires READ_MEDIA_IMAGES
-                    permission = PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES;
-                } else {
-                    // Android <13 requires READ_EXTERNAL_STORAGE
-                    permission = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
-                }
-
-                const granted = await PermissionsAndroid.request(permission, {
-                    title: 'Photo Permission',
-                    message: 'This app needs access to your photos to show albums.',
-                    buttonPositive: 'Allow',
-                });
-
-                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                    setPermissionGranted(true);
-                    await fetchAlbums();
-                } else {
-                    Alert.alert('Permission Denied', 'We need access to your photos to show albums.');
-                }
-            } catch (err) {
-                console.error('Failed to request permission:', err);
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status === 'granted') {
+                setPermissionGranted(true);
+                await fetchAlbums();
+            } else {
+                Alert.alert('Permission Denied', 'We need access to your gallery to show albums.');
             }
         };
 
@@ -108,7 +78,7 @@ function MainGallery() {
                     contentContainerStyle={styles.grid}
                 />
             ) : (
-                <Text style={styles.permissionText}>Permission required to access photos.</Text>
+                <Text style={styles.permissionText}>Permission required to access media library.</Text>
             )}
         </View>
     );
@@ -122,6 +92,8 @@ function RateTheApp() {
     );
 }
 
+
+
 export default function GalleryAlbums() {
     return (
         <Drawer.Navigator
@@ -133,7 +105,8 @@ export default function GalleryAlbums() {
             }}
         >
             <Drawer.Screen name="Gallery" component={MainGallery} options={{ title: 'My Gallery' }} />
-            <Drawer.Screen name="Rate" component={RateTheApp} options={{ title: '5 star!' }} />
+            <Drawer.Screen name="Rate"    component={RateTheApp} options={{ title: '5 star!' }} />
         </Drawer.Navigator>
     );
 }
+
