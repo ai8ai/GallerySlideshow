@@ -1,15 +1,14 @@
-import styles from '@/styles/styles'
 import { Animated } from 'react-native';
 
 export enum AnimationType {
+    Zoom = 'zoom',
     Fade = 'fade',
+    Bounce = 'bounce',
+    Wobble = 'wobble',
     Scale = 'scale',
     Rotate = 'rotate',
     Slide = 'slide',
-    Zoom = 'zoom',
-    Bounce = 'bounce',
     Flip = 'flip',
-    Wobble = 'wobble',
 }
 
 export const getAnimationStyle = (animationType: AnimationType, scaleAnim: Animated.Value) => {

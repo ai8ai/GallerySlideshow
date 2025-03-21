@@ -1,25 +1,13 @@
-import styles from '@/styles/styles';
+import styles from '@/config/styles';
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    FlatList,
-    Image,
-    Text,
-    TouchableOpacity,
-    Alert,
-    PermissionsAndroid,
-    Platform,
-} from 'react-native';
+import { View, FlatList, Image, Text, TouchableOpacity, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { router } from 'expo-router';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 
 // Define the extended Album type
 interface AlbumWithCover extends MediaLibrary.Album {
     cover: string | null;
 }
-
-const Drawer = createDrawerNavigator();
 
 function MainGallery() {
     const [albums, setAlbums] = useState<AlbumWithCover[]>([]); // Explicitly use AlbumWithCover[]
@@ -27,33 +15,12 @@ function MainGallery() {
 
     useEffect(() => {
         const getPermissions = async () => {
-            try {
-                // Request only photo permissions on Android
-                let permission;
-                const androidVersion = typeof Platform.Version === 'string' ? parseInt(Platform.Version, 10) : Platform.Version;
-
-                if (androidVersion >= 33) {
-                    // Android 13+ requires READ_MEDIA_IMAGES
-                    permission = PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES;
-                } else {
-                    // Android <13 requires READ_EXTERNAL_STORAGE
-                    permission = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
-                }
-
-                const granted = await PermissionsAndroid.request(permission, {
-                    title: 'Photo Permission',
-                    message: 'This app needs access to your photos to show albums.',
-                    buttonPositive: 'Allow',
-                });
-
-                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                    setPermissionGranted(true);
-                    await fetchAlbums();
-                } else {
-                    Alert.alert('Permission Denied', 'We need access to your photos to show albums.');
-                }
-            } catch (err) {
-                console.error('Failed to request permission:', err);
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status === 'granted') {
+                setPermissionGranted(true);
+                await fetchAlbums();
+            } else {
+                Alert.alert('Permission Denied', 'We need access to your gallery to show albums.');
             }
         };
 
@@ -78,12 +45,15 @@ function MainGallery() {
         getPermissions();
     }, []);
 
+
     const handleAlbumPress = (album: AlbumWithCover) => {
+        console.log('Album pressed:', album);
         router.push({
-            pathname: '/about',
+            pathname: "/cat2img", 
             params: { selectedAlbum: JSON.stringify(album) },
         });
     };
+
 
     const renderAlbum = ({ item }: { item: AlbumWithCover }) => (
         <TouchableOpacity style={styles.albumContainer} onPress={() => handleAlbumPress(item)}>
@@ -98,42 +68,22 @@ function MainGallery() {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={styles.mainContainer}>
             {permissionGranted ? (
                 <FlatList
                     data={albums}
                     keyExtractor={(item) => item.id}
                     renderItem={renderAlbum}
                     numColumns={2}
-                    contentContainerStyle={styles.grid}
+                    contentContainerStyle={styles.mainGrid}
                 />
             ) : (
-                <Text style={styles.permissionText}>Permission required to access photos.</Text>
+                <Text style={styles.permissionText}>Permission required to access media library.</Text>
             )}
         </View>
     );
 }
 
-function RateTheApp() {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.permissionText}>coming soon!</Text>
-        </View>
-    );
-}
-
 export default function GalleryAlbums() {
-    return (
-        <Drawer.Navigator
-            screenOptions={{
-                drawerStyle: {
-                    width: 250,
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                },
-            }}
-        >
-            <Drawer.Screen name="Gallery" component={MainGallery} options={{ title: 'My Gallery' }} />
-            <Drawer.Screen name="Rate" component={RateTheApp} options={{ title: '5 star!' }} />
-        </Drawer.Navigator>
-    );
+    return <MainGallery />;
 }

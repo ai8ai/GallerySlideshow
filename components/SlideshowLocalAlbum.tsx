@@ -1,7 +1,9 @@
-import styles from '@/styles/styles'
+import styles from '@/config/styles'
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Animated, Pressable, Modal, Text, TextInput, Button } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
+import { StatusBar } from 'expo-status-bar';
+
 import { AnimationType, getAnimationStyle } from '@/utils/animationStyles';
 import useScaleAnimation from '@/hooks/useAnimations';
 import useFetchImages from '@/hooks/useFetchImages';
@@ -47,10 +49,10 @@ const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
     }
 
     return (
-        <View style={styles.imageContainer}>
-            <Animated.View style={[styles.image, getAnimationStyle(animationType, scaleAnim)]}>
+        <View style={styles.sliderContainer}>
+            <Animated.View style={[styles.sliderImage, getAnimationStyle(animationType, scaleAnim)]}>
                 <Pressable onPress={() => setModalVisible(true)}>
-                    <Animated.Image source={{ uri: images[currentIndex] }} style={styles.image} />
+                    <Animated.Image source={{ uri: images[currentIndex] }} style={styles.sliderImage} />
                 </Pressable>
             </Animated.View>
             <Modal
@@ -74,6 +76,7 @@ const AlbumSlideshow: React.FC<{ album: MediaLibrary.Album }> = ({ album }) => {
                     </View>
                 </View>
             </Modal>
+            <StatusBar style="light" translucent />
         </View>
     );
 };
