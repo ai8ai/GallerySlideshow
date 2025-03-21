@@ -10,12 +10,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import styles from '@/config/styles';
 
-
-
-const GITHUB_API_URL = (ghname: string, repo: string, folder: string) => `https://api.github.com/repos/${ghname}/${repo}/contents/${folder}`;
-const GITHUB_RAW_URL = (ghname: string, repo: string, folder: string) => `https://raw.githubusercontent.com/${ghname}/${repo}/main/${folder}/`;
-
-
 export default function SlideshowScreen() {
     const navigation = useNavigation();
     const parentNavi = navigation.getParent();
@@ -136,31 +130,6 @@ export default function SlideshowScreen() {
         }
     };
 
-    // Download Image
-    const downloadImage = async () => {
-        // Request permission dynamically
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-            showToast("Please grant media access to save images.");
-            return;
-        }
-
-        try {
-            const imageUrl = images[currentImage];
-            const fileName = imageUrl.split('/').pop();
-            const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
-            const { uri } = await FileSystem.downloadAsync(imageUrl, fileUri);
-            const asset = await MediaLibrary.createAssetAsync(uri);
-            await MediaLibrary.createAlbumAsync("Downloaded Images", asset, false);
-
-            showToast("Download complete! Image saved.");
-        } catch (error) {
-            console.error("Download Error:", error);
-            showToast("Download failed. Try again.");
-        }
-    };
-
     if (images.length === 0) {
 
         return (
@@ -173,11 +142,6 @@ export default function SlideshowScreen() {
 
     return (
         <View style={styles.sliderContainer}>
-            {!isAutoSlideshow && (
-                <TouchableOpacity onPress={downloadImage} style={{ position: 'absolute', top: 20, right: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', padding: 10, borderRadius: 20, zIndex: 10 }}>
-                    <MaterialCommunityIcons name="download" size={24} color="white" />
-                </TouchableOpacity>
-            )}
             <TouchableOpacity onPress={toggleSlideshow} style={{ position: 'absolute', width: '100%', height: '100%' }}>
                 <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
                     <Image source={{ uri: images[currentImage] }} style={[styles.sliderImage, { resizeMode }]} />
